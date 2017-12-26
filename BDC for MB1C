@@ -1,0 +1,136 @@
+report ZBDC_MB1C_STOCK
+       no standard page heading line-size 255.
+
+"include bdcrecx1.
+DATA : BEGIN OF ITAB OCCURS 0,
+       BWARTWA(3),
+       WERKS(4),
+       LGORT(4),
+       MATNR(10),
+       ERFMG(10),
+       END OF ITAB.
+
+DATA: T_BDCDATA TYPE BDCDATA OCCURS 0 WITH HEADER LINE,
+      BDCMSG TYPE TABLE OF BDCMSGCOLL,
+      FILE TYPE STRING.
+
+SELECTION-SCREEN BEGIN OF BLOCK B1 WITH FRAME TITLE TEXT-001.
+PARAMETERS : P_FILE TYPE RLGRAP-FILENAME.
+SELECTION-SCREEN END OF BLOCK B1.
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR P_FILE.
+
+CALL FUNCTION 'F4_FILENAME'
+ EXPORTING
+   PROGRAM_NAME        = SYST-CPROG
+   DYNPRO_NUMBER       = SYST-DYNNR
+   FIELD_NAME          = ' '
+ IMPORTING
+   FILE_NAME           = P_FILE
+          .
+
+start-of-selection.
+FILE = P_FILE.
+CALL FUNCTION 'GUI_UPLOAD'
+  EXPORTING
+    FILENAME                      = FILE
+    FILETYPE                      = 'DAT'
+
+  TABLES
+    DATA_TAB                      = ITAB .
+
+
+*perform open_group.
+*perform close_group.
+
+LOOP AT ITAB.
+IF SY-TABIX = 1.
+ SKIP .
+ELSE.
+CLEAR : T_BDCDATA[].
+perform bdc_dynpro      using 'SAPMM07M' '0400'.
+perform bdc_field       using 'BDC_CURSOR'
+                              'XFULL'.
+perform bdc_field       using 'BDC_OKCODE'
+                              '/00'.
+perform bdc_field       using 'MKPF-BLDAT'
+                              '05.04.2016'.
+perform bdc_field       using 'MKPF-BUDAT'
+                              '05.04.2016'.
+perform bdc_field       using 'RM07M-BWARTWA'
+                              ITAB-BWARTWA."'561'.
+perform bdc_field       using 'RM07M-WERKS'
+                              ITAB-WERKS."'FA01'.
+perform bdc_field       using 'RM07M-LGORT'
+                              ITAB-LGORT."'FARM'.
+perform bdc_field       using 'XFULL'
+                              ''.
+perform bdc_field       using 'RM07M-WVERS2'
+                              'X'.
+perform bdc_dynpro      using 'SAPMM07M' '0421'.
+perform bdc_field       using 'BDC_CURSOR'
+                              'MSEG-ERFMG(01)'.
+perform bdc_field       using 'BDC_OKCODE'
+                              '/00'.
+perform bdc_field       using 'MSEG-MATNR(01)'
+                              ITAB-MATNR."'8010000041'.
+perform bdc_field       using 'MSEG-ERFMG(01)'
+                              ITAB-ERFMG."'50'.
+perform bdc_dynpro      using 'SAPMM07M' '0421'.
+perform bdc_field       using 'BDC_CURSOR'
+                              'MSEG-ERFMG(01)'.
+perform bdc_field       using 'BDC_OKCODE'
+                              '/00'.
+perform bdc_dynpro      using 'SAPMM07M' '0421'.
+perform bdc_field       using 'BDC_CURSOR'
+                              'MSEG-ERFMG(01)'.
+perform bdc_field       using 'BDC_OKCODE'
+                              '=BU'.
+"perform bdc_transaction using 'MB1C'.
+CALL TRANSACTION 'MB1C' USING T_BDCDATA
+            MODE 'A' UPDATE 'S' MESSAGES INTO BDCMSG.
+
+   IF SY-SUBRC EQ 0.
+      "WRITE :/ 'Submitted to BDC'.
+    ENDIF.
+
+ENDIF.
+ENDLOOP.
+DATA : WA_BDCMSG LIKE LINE OF BDCMSG.
+  IF BDCMSG IS NOT INITIAL. "display messages
+    LOOP AT BDCMSG INTO WA_BDCMSG.
+     WRITE:/ 'T-CODE', WA_BDCMSG-TCODE, 'DOCUMENT', WA_BDCMSG-MSGV1, 'POSTED'.
+      CLEAR WA_BDCMSG.
+    ENDLOOP.
+  ENDIF.
+*&---------------------------------------------------------------------*
+*&      Form  BDC_DYNPRO
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->P_0100   text
+*      -->P_0101   text
+*----------------------------------------------------------------------*
+FORM BDC_DYNPRO  USING    VALUE(P_0100)
+                          VALUE(P_0101).
+CLEAR T_BDCDATA.
+T_BDCDATA-PROGRAM = P_0100.
+T_BDCDATA-DYNPRO = P_0101.
+T_BDCDATA-DYNBEGIN = 'X'.
+APPEND T_BDCDATA.
+ENDFORM.                    " BDC_DYNPRO
+*&---------------------------------------------------------------------*
+*&      Form  BDC_FIELD
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->P_0105   text
+*      -->P_0106   text
+*----------------------------------------------------------------------*
+FORM BDC_FIELD  USING    VALUE(P_0105)
+                         VALUE(P_0106).
+ CLEAR T_BDCDATA.
+ T_BDCDATA-FNAM = P_0105.
+ T_BDCDATA-FVAL = P_0106.
+ APPEND T_BDCDATA.
+
+ENDFORM.                    " BDC_FIELD
