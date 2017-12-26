@@ -1,0 +1,121 @@
+report ZBDC_FK01_R
+       no standard page heading line-size 255.
+
+include bdcrecx1.
+
+DATA: BEGIN OF ITAB OCCURS 0,
+      BUKRS(10),
+      KTOKK(10),
+      NAME1(10),
+      SORTL(10),
+      LAND1(10),
+      AKONT(10),
+     END OF ITAB.
+PARAMETERS : P_FILE TYPE RLGRAP-FILENAME OBLIGATORY.
+DATA: FILE TYPE STRING.
+
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR P_FILE.
+CALL FUNCTION 'F4_FILENAME'
+ EXPORTING
+   PROGRAM_NAME        = SYST-CPROG
+   DYNPRO_NUMBER       = SYST-DYNNR
+   FIELD_NAME          = ' '
+ IMPORTING
+   FILE_NAME           = P_FILE .
+
+start-of-selection.
+ FILE = P_FILE.
+CALL FUNCTION 'GUI_UPLOAD'
+  EXPORTING
+    FILENAME                      = FILE
+    FILETYPE                      = 'DAT'
+*   HAS_FIELD_SEPARATOR           = ' '
+*   HEADER_LENGTH                 = 0
+*   READ_BY_LINE                  = 'X'
+*   DAT_MODE                      = ' '
+*   CODEPAGE                      = ' '
+*   IGNORE_CERR                   = ABAP_TRUE
+*   REPLACEMENT                   = '#'
+*   CHECK_BOM                     = ' '
+*   VIRUS_SCAN_PROFILE            =
+*   NO_AUTH_CHECK                 = ' '
+* IMPORTING
+*   FILELENGTH                    =
+*   HEADER                        =
+  TABLES
+    DATA_TAB                      = ITAB
+* EXCEPTIONS
+*   FILE_OPEN_ERROR               = 1
+*   FILE_READ_ERROR               = 2
+*   NO_BATCH                      = 3
+*   GUI_REFUSE_FILETRANSFER       = 4
+*   INVALID_TYPE                  = 5
+*   NO_AUTHORITY                  = 6
+*   UNKNOWN_ERROR                 = 7
+*   BAD_DATA_FORMAT               = 8
+*   HEADER_NOT_ALLOWED            = 9
+*   SEPARATOR_NOT_ALLOWED         = 10
+*   HEADER_TOO_LONG               = 11
+*   UNKNOWN_DP_ERROR              = 12
+*   ACCESS_DENIED                 = 13
+*   DP_OUT_OF_MEMORY              = 14
+*   DISK_FULL                     = 15
+*   DP_TIMEOUT                    = 16
+*   OTHERS                        = 17
+          .
+IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+ENDIF.
+
+perform open_group.
+LOOP AT ITAB.
+perform bdc_dynpro      using 'SAPMF02K' '0105'.
+perform bdc_field       using 'BDC_CURSOR'
+                              'RF02K-KTOKK'.
+perform bdc_field       using 'BDC_OKCODE'
+                              '/00'.
+perform bdc_field       using 'RF02K-BUKRS'
+                              ITAB-BUKRS."'1000'.
+perform bdc_field       using 'RF02K-KTOKK'
+                              ITAB-KTOKK."'0002'.
+perform bdc_dynpro      using 'SAPMF02K' '0110'.
+perform bdc_field       using 'BDC_CURSOR'
+                              'LFA1-LAND1'.
+perform bdc_field       using 'BDC_OKCODE'
+                              '=VW'.
+perform bdc_field       using 'LFA1-NAME1'
+                              ITAB-NAME1."'RAGHU'.
+perform bdc_field       using 'LFA1-SORTL'
+                              ITAB-SORTL."'R'.
+perform bdc_field       using 'LFA1-LAND1'
+                              ITAB-LAND1."'IN'.
+perform bdc_dynpro      using 'SAPMF02K' '0120'.
+perform bdc_field       using 'BDC_CURSOR'
+                              'LFA1-KUNNR'.
+perform bdc_field       using 'BDC_OKCODE'
+                              '=VW'.
+perform bdc_dynpro      using 'SAPMF02K' '0130'.
+perform bdc_field       using 'BDC_CURSOR'
+                              'LFBK-BANKS(01)'.
+perform bdc_field       using 'BDC_OKCODE'
+                              '=VW'.
+perform bdc_dynpro      using 'SAPMF02K' '0380'.
+perform bdc_field       using 'BDC_CURSOR'
+                              'KNVK-NAMEV(01)'.
+perform bdc_field       using 'BDC_OKCODE'
+                              '=VW'.
+perform bdc_dynpro      using 'SAPMF02K' '0210'.
+perform bdc_field       using 'BDC_CURSOR'
+                              'LFB1-AKONT'.
+perform bdc_field       using 'BDC_OKCODE'
+                              '=VW'.
+perform bdc_field       using 'LFB1-AKONT'
+                              ITAB-AKONT."'31000'.
+perform bdc_dynpro      using 'SAPMF02K' '0215'.
+perform bdc_field       using 'BDC_CURSOR'
+                              'LFB1-ZTERM'.
+perform bdc_field       using 'BDC_OKCODE'
+                              '=UPDA'.
+perform bdc_transaction using 'FK01'.
+ENDLOOP.
+perform close_group.
