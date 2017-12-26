@@ -1,0 +1,33 @@
+*&---------------------------------------------------------------------*
+*& Report  ZCAL_R
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZCAL_R.
+PARAMETERS: NUMBER1 TYPE I,
+            OPRATION TYPE C,
+            NUMBER2 TYPE I.
+DATA : RESULT TYPE P DECIMALS 2.
+IF ( OPRATION = '+' OR OPRATION = '-' OR
+    OPRATION = '*' OR OPRATION = '/' ).
+  CASE OPRATION.
+    WHEN '+'.
+      RESULT = NUMBER1 + NUMBER2.
+    WHEN '-'.
+      RESULT = NUMBER1 - NUMBER2.
+    WHEN '*'.
+      RESULT = NUMBER1 * NUMBER2.
+    WHEN '/'.
+      if NUMBER2 EQ 0.
+      MESSAGE 'Divide by Zero is not possible' TYPE 'I'.
+      ELSE.
+      RESULT = NUMBER1 / NUMBER2.
+      ENDIF.
+    ENDCASE.
+  WRITE:/ 'RESULT =',RESULT.
+  ELSE.
+  WRITE:/ 'INVALID'.
+  ENDIF.
