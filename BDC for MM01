@@ -1,0 +1,117 @@
+report ZBDC_MM01_FILE
+       no standard page heading line-size 255.
+
+include bdcrecx1.
+
+parameters: dataset(132) lower case.
+***    DO NOT CHANGE - the generated data section - DO NOT CHANGE    ***
+*
+*   If it is nessesary to change the data section use the rules:
+*   1.) Each definition of a field exists of two lines
+*   2.) The first line shows exactly the comment
+*       '* data element: ' followed with the data element
+*       which describes the field.
+*       If you don't have a data element use the
+*       comment without a data element name
+*   3.) The second line shows the fieldname of the
+*       structure, the fieldname must consist of
+*       a fieldname and optional the character '_' and
+*       three numbers and the field length in brackets
+*   4.) Each field must be type C.
+*
+*** Generated data section with specific formatting - DO NOT CHANGE  ***
+data: begin of record OCCURS 0,
+* data element: MBRSH
+        MBRSH_001(001),
+* data element: MTART
+        MTART_002(004),
+* data element: XFELD
+        KZSEL_01_003(001),
+* data element: XFELD
+        KZSEL_02_004(001),
+* data element: MAKTX
+        MAKTX_005(040),
+* data element: MEINS
+        MEINS_006(003),
+* data element: MAKTX
+        MAKTX_007(040),
+      end of record.
+
+*** End generated data section ***
+DATA : FILE TYPE STRING.
+PARAMETERS : P_FILE TYPE RLGRAP-FILENAME.
+
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR P_FILE.
+
+CALL FUNCTION 'F4_FILENAME'
+ EXPORTING
+   PROGRAM_NAME        = SYST-CPROG
+   DYNPRO_NUMBER       = SYST-DYNNR
+   FIELD_NAME          = ' '
+ IMPORTING
+   FILE_NAME           = P_FILE
+          .
+
+start-of-selection.
+
+FILE = P_FILE.
+CALL FUNCTION 'GUI_UPLOAD'
+  EXPORTING
+    FILENAME                      = FILE
+    FILETYPE                      = 'ASC'
+
+  TABLES
+    DATA_TAB                      = record
+          .
+IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+ENDIF.
+
+*perform open_dataset using dataset.
+perform open_group.
+
+do.
+
+read dataset dataset into record.
+if sy-subrc <> 0. exit. endif.
+
+perform bdc_dynpro      using 'SAPLMGMM' '0060'.
+perform bdc_field       using 'BDC_CURSOR'
+                              'RMMG1-MTART'.
+perform bdc_field       using 'BDC_OKCODE'
+                              '=AUSW'.
+perform bdc_field       using 'RMMG1-MBRSH'
+                              record-MBRSH_001.
+perform bdc_field       using 'RMMG1-MTART'
+                              record-MTART_002.
+perform bdc_dynpro      using 'SAPLMGMM' '0070'.
+perform bdc_field       using 'BDC_CURSOR'
+                              'MSICHTAUSW-DYTXT(02)'.
+perform bdc_field       using 'BDC_OKCODE'
+                              '=ENTR'.
+perform bdc_field       using 'MSICHTAUSW-KZSEL(01)'
+                              record-KZSEL_01_003.
+perform bdc_field       using 'MSICHTAUSW-KZSEL(02)'
+                              record-KZSEL_02_004.
+perform bdc_dynpro      using 'SAPLMGMM' '4004'.
+perform bdc_field       using 'BDC_OKCODE'
+                              '/00'.
+perform bdc_field       using 'BDC_CURSOR'
+                              'MAKT-MAKTX'.
+perform bdc_field       using 'MAKT-MAKTX'
+                              record-MAKTX_005.
+perform bdc_field       using 'MARA-MEINS'
+                              record-MEINS_006.
+perform bdc_dynpro      using 'SAPLMGMM' '4004'.
+perform bdc_field       using 'BDC_OKCODE'
+                              '=BU'.
+perform bdc_field       using 'BDC_CURSOR'
+                              'MAKT-MAKTX'.
+perform bdc_field       using 'MAKT-MAKTX'
+                              record-MAKTX_007.
+perform bdc_transaction using 'MM01'.
+
+enddo.
+
+perform close_group.
+*perform close_dataset using dataset.
