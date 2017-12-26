@@ -1,0 +1,22 @@
+*&---------------------------------------------------------------------*
+*& Report  ZCX_EXCP_CLS
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZCX_EXCP_CLS.
+DATA : EX_REF TYPE REF TO CX_ROOT.
+DATA : MESSAGE_TEXT TYPE STRING.
+
+TRY.
+  RAISE EXCEPTION TYPE ZCX_EXCP_CLS
+            EXPORTING MSGV1 = 'FOR'
+                      MSGV2 = 'HANDLING'
+                      MSGV3 = 'EXCEPTIONS'
+                      MSGV4 = 'IN PROGRAM'.
+  CATCH ZCX_EXCP_CLS INTO EX_REF.
+    MESSAGE_TEXT = EX_REF->GET_TEXT( ).
+    WRITE MESSAGE_TEXT.
+ENDTRY.
