@@ -1,0 +1,64 @@
+*&---------------------------------------------------------------------*
+*& Report  ZINHERING_R
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZINHERING_R.
+CLASS C1 DEFINITION.
+  PUBLIC SECTION.
+  DATA: A TYPE I,
+        B TYPE I,
+        RES TYPE I.
+   METHODS: METH,
+            ADD.
+ ENDCLASS.
+ CLASS C1 IMPLEMENTATION.
+   METHOD METH.
+     WRITE:/'I AM SUPER CLASS'.
+   ENDMETHOD.
+   METHOD ADD.
+       A = 20.
+       B = 30.
+      RES = A + B.
+      WRITE :/'SUM OF TWO NUMBER',RES.
+     ENDMETHOD.
+  ENDCLASS.
+  CLASS C2 DEFINITION INHERITING FROM C1.
+    PUBLIC SECTION.
+    DATA: A1 TYPE I,
+          B1 TYPE I,
+          R1 TYPE I.
+    METHODS : METH REDEFINITION,
+              SUB.
+  ENDCLASS.
+  CLASS C2 IMPLEMENTATION.
+  METHOD METH.
+    WRITE:/'IT IS SUPER CLASS METHO CALLED IN SUBCLASS'.
+    ENDMETHOD.
+    METHOD SUB.
+      A1 = 10.
+      B1 = 5.
+      R1 = A1 - B1.
+      WRITE:/'SUB OF 2 NO',R1.
+      ENDMETHOD.
+    ENDCLASS.
+
+    DATA: OBJ TYPE REF TO C2,
+          OBJ1 TYPE REF TO C1.
+
+    START-OF-SELECTION.
+    CREATE OBJECT : OBJ,
+                    OBJ1.
+
+    CALL METHOD OBJ->METH.
+    CALL METHOD OBJ->SUB.
+    CALL METHOD OBJ->ADD.
+ULINE.
+*    DATA: OBJ1 TYPE REF TO C1.
+*    START-OF-SELECTION.
+*    CREATE OBJECT OBJ1.
+    CALL METHOD OBJ1->METH.
+    CALL METHOD OBJ1->ADD.
