@@ -1,0 +1,73 @@
+*&---------------------------------------------------------------------*
+*& Report  ZDATE_R
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZDATE_R.
+TYPES : BEGIN OF ty ,
+        F1,
+        F2(3),
+        F3(10),
+        END OF TY.
+
+ DATA : WA TYPE TY,
+        ITAB TYPE TABLE OF TY.
+
+WA-F1 = '1'.
+WA-F2 = '20'.
+WA-F3 = 'RAGHU'.
+APPEND WA TO ITAB.
+
+WA-F1 = '2'.
+WA-F2 = '30'.
+WA-F3 = 'DON'.
+APPEND WA TO ITAB.
+
+WA-F1 = '3'.
+WA-F2 = '240'.
+WA-F3 = 'THOMAS'.
+APPEND WA TO ITAB.
+*INSERT WA INTO TABLE ITAB.
+READ TABLE ITAB INTO WA INDEX 3.
+*IF SY-SUBRC = 0.
+*loop at itab into wa.
+  WRITE :/ WA-F1,
+           WA-F2,
+           WA-F3.
+*  endloop.
+*ELSE.
+*  WRITE:/ 'RECORD IS NOT FOUND'.
+*  ENDIF.
+*DELETE TABLE ITAB FROM WA.
+*LOOP AT ITAB INTO WA.
+*  WRITE :/ WA-F1,
+*           WA-F2,
+*           WA-F3.
+*      ENDLOOP.
+
+*DATA : NAME TYPE N.
+*
+*WRITE :/ 'DEFAULT',NAME.
+*NAME = NAME + 1.
+*WRITE :/ NAME.
+*
+*DATA : VAR TYPE STRING,
+*       VAR1 TYPE STRING,
+*       VAR2 TYPE STRING,
+*       VAR3 TYPE STRING,
+*       VAR4 TYPE STRING,
+*       VAR5 TYPE STRING.
+*
+*VAR = 'C3121QC667:100:MH:HO:04400021'.
+*
+*FIND '3121' IN VAR.
+*
+*SPLIT VAR AT ':' INTO VAR1 VAR2 VAR3 VAR4 VAR5.
+*WRITE :/  'VAR1 =',VAR1,
+*          'VAR2 =',VAR2,
+*          'VAR3 =',VAR3,
+*          'VAR4 =',VAR4,
+*          'VAR5 =',VAR5.
