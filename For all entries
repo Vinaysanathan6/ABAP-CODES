@@ -1,0 +1,59 @@
+*&---------------------------------------------------------------------*
+*& Report  ZFORALL_R
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZFORALL_R.
+
+PARAMETERS p_city TYPE spfli-cityfrom.
+
+TYPES: BEGIN OF entry_tab_type,
+
+         carrid TYPE spfli-carrid,
+
+         connid TYPE spfli-connid,
+
+         fldate TYPE SFLIGHT-FLDATE,
+
+       END OF entry_tab_type.
+
+DATA: entry_tab   TYPE TABLE OF entry_tab_type,
+
+      sflight_tab TYPE SORTED TABLE OF sflight
+
+                       WITH UNIQUE KEY carrid connid fldate,
+      WA TYPE entry_tab_type.
+
+SELECT carrid connid
+
+       FROM spfli
+
+       INTO CORRESPONDING FIELDS OF TABLE entry_tab
+
+       WHERE cityfrom = p_city.
+
+LOOP AT ENTRY_TAB INTO WA.
+WRITE :/ WA-CARRID,
+         WA-CONNID.
+ENDLOOP.
+
+SELECT carrid connid FLDATE
+
+       FROM sflight
+
+       INTO CORRESPONDING FIELDS OF TABLE sflight_tab
+
+       FOR ALL ENTRIES IN entry_tab
+
+       WHERE carrid = entry_tab-carrid AND
+
+             connid = entry_tab-connid.
+
+
+LOOP AT sflight_tab INTO WA.
+WRITE :/ WA-CARRID,
+         WA-FLDATE.
+ENDLOOP.
