@@ -1,0 +1,134 @@
+*&---------------------------------------------------------------------*
+*& Report  ZALV_INTER1
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZALV_INTER1.
+TYPE-POOLS : SLIS.
+TABLES : ZCUST_R.
+TYPES : BEGIN OF TY_MARA,
+        MATNR TYPE MARA-MATNR,"METERIAL NUMBER
+        MTART TYPE MARA-MTART,"METERIAL TYPE
+        MBRSH TYPE MARA-MBRSH,"INSUTRIAL SECTOR
+        MEINS TYPE MARA-MEINS,"UNIT OF MEASURE
+        END OF TY_MARA.
+
+DATA: IT_MARA TYPE TABLE OF TY_MARA,
+      WA_MARA TYPE TY_MARA,
+      ITAB TYPE TABLE OF ZCUST_R.
+
+DATA : IT_FCAT TYPE SLIS_T_FIELDCAT_ALV,
+       WA_FCAT TYPE SLIS_FIELDCAT_ALV.
+
+PARAMETERS : P_MTART TYPE MARA-MTART.
+
+START-OF-SELECTION.
+SELECT MATNR MTART MBRSH MEINS FROM MARA
+  INTO TABLE IT_MARA UP TO 50 ROWS WHERE MTART = P_MTART.
+
+WA_FCAT-COL_POS = '1'.
+WA_FCAT-FIELDNAME = 'MATNR'.
+WA_FCAT-TABNAME = 'IT_MARA'.
+WA_FCAT-SELTEXT_M = 'METERIAL'.
+WA_FCAT-KEY = 'X'.
+WA_FCAT-HOTSPOT = 'X'.
+APPEND WA_FCAT TO IT_FCAT.
+CLEAR WA_FCAT.
+
+WA_FCAT-COL_POS = '2'.
+WA_FCAT-FIELDNAME = 'MBRSH'.
+WA_FCAT-TABNAME = 'IT_MARA'.
+WA_FCAT-SELTEXT_M = 'INDUSTRY SEC'.
+APPEND WA_FCAT TO IT_FCAT.
+CLEAR WA_FCAT.
+
+WA_FCAT-COL_POS = '3'.
+WA_FCAT-FIELDNAME = 'MTART'.
+WA_FCAT-TABNAME = 'IT_MARA'.
+WA_FCAT-SELTEXT_M = 'METERIAL TYPE'.
+APPEND WA_FCAT TO IT_FCAT.
+CLEAR WA_FCAT.
+
+WA_FCAT-COL_POS = '4'.
+WA_FCAT-FIELDNAME = 'MEINS'.
+WA_FCAT-TABNAME = 'IT_MARA'.
+WA_FCAT-SELTEXT_M = 'BASE.UNIT'.
+WA_FCAT-REF_TABNAME = 'MARA'.
+APPEND WA_FCAT TO IT_FCAT.
+CLEAR WA_FCAT.
+
+CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+ EXPORTING
+    I_CALLBACK_PROGRAM                = SY-REPID
+*   I_CALLBACK_PF_STATUS_SET          = ' '
+    I_CALLBACK_USER_COMMAND           = 'USER_COMMAND'
+
+    IT_FIELDCAT                       = IT_FCAT
+
+  TABLES
+    T_OUTTAB                          = IT_MARA
+         .
+IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+ENDIF.
+
+FORM USER_COMMAND USING R_UCOMM LIKE SY-UCOMM
+                 RS_SELFIELD TYPE SLIS_SELFIELD.
+CASE R_UCOMM.
+  WHEN '&IC1'.
+    SELECT * FROM ZCUST_R UP TO 20 ROWS INTO TABLE ITAB.
+    CALL FUNCTION 'REUSE_ALV_LIST_DISPLAY'
+     EXPORTING
+*       I_INTERFACE_CHECK              = ' '
+*       I_BYPASSING_BUFFER             =
+*       I_BUFFER_ACTIVE                = ' '
+*       I_CALLBACK_PROGRAM             = ' '
+*       I_CALLBACK_PF_STATUS_SET       = ' '
+*       I_CALLBACK_USER_COMMAND        = ' '
+        I_STRUCTURE_NAME               = 'ZCUST_R'
+*       IS_LAYOUT                      =
+*       IT_FIELDCAT                    =
+*       IT_EXCLUDING                   =
+*       IT_SPECIAL_GROUPS              =
+*       IT_SORT                        =
+*       IT_FILTER                      =
+*       IS_SEL_HIDE                    =
+*       I_DEFAULT                      = 'X'
+*       I_SAVE                         = ' '
+*       IS_VARIANT                     =
+*       IT_EVENTS                      =
+*       IT_EVENT_EXIT                  =
+*       IS_PRINT                       =
+*       IS_REPREP_ID                   =
+*       I_SCREEN_START_COLUMN          = 0
+*       I_SCREEN_START_LINE            = 0
+*       I_SCREEN_END_COLUMN            = 0
+*       I_SCREEN_END_LINE              = 0
+*       IR_SALV_LIST_ADAPTER           =
+*       IT_EXCEPT_QINFO                =
+*       I_SUPPRESS_EMPTY_DATA          = ABAP_FALSE
+*     IMPORTING
+*       E_EXIT_CAUSED_BY_CALLER        =
+*       ES_EXIT_CAUSED_BY_USER         =
+      TABLES
+        T_OUTTAB                       = ITAB
+*     EXCEPTIONS
+*       PROGRAM_ERROR                  = 1
+*       OTHERS                         = 2
+              .
+    IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+    ENDIF.
+
+
+*    READ TABLE IT_MARA INTO WA_MARA INDEX
+*                RS_SELFIELD-TABINDEX.
+*    IF SY-SUBRC = 0.
+*      SET PARAMETER ID 'MAT' FIELD WA_MARA-MATNR.
+*      CALL TRANSACTION 'MM03' AND SKIP FIRST SCREEN.
+*    ENDIF.
+ENDCASE.
+ENDFORM.
