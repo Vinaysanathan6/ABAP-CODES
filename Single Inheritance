@@ -1,0 +1,42 @@
+*&---------------------------------------------------------------------*
+*& Report  ZCL_SINGLE_R
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZCL_SINGLE_R.
+CLASS C1 DEFINITION.
+  PUBLIC SECTION.
+  METHODS: DISPLAY,
+           ACC.
+  PRIVATE SECTION.
+  DATA: SPEED TYPE I.
+  ENDCLASS.
+  CLASS C1 IMPLEMENTATION.
+    METHOD:DISPLAY.
+      WRITE:/'I AM SUPPER CLASS METHOD'.
+      ENDMETHOD.
+    METHOD ACC.
+      WRITE :/'AM ANOTHER METHOD OF SUPER CLASS.'.
+     ENDMETHOD.
+  ENDCLASS.
+  CLASS C2 DEFINITION INHERITING FROM C1.
+    PUBLIC SECTION.
+    METHODS:DISPLAY REDEFINITION.
+
+   ENDCLASS.
+   CLASS C2 IMPLEMENTATION.
+     METHOD: DISPLAY.
+    WRITE:/'METHOD CALLED BY SUBCLASS'.
+       ENDMETHOD.
+     ENDCLASS.
+
+  DATA : OV1 TYPE REF TO C1.
+
+  START-OF-SELECTION.
+    CREATE OBJECT: OV1 TYPE C1.
+    CALL METHOD OV1->DISPLAY.
+    CREATE OBJECT OV1 TYPE C2.
+    CALL METHOD OV1->DISPLAY.
