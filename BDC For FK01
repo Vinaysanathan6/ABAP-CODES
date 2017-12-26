@@ -1,0 +1,118 @@
+report ZBDC_FK011
+       no standard page heading line-size 255.
+
+include bdcrecx1.
+DATA: BEGIN OF ITAB OCCURS 0,
+      LIFNR(016),
+      BUKRS(004),
+      KTOKK(004),
+      NAME1(035),
+      SORTL(010),
+      STRAS(035),
+      PFACH(010),
+      ORT01(035),
+      LAND1(003),
+      REGIO(003),
+      SPRAS(002),
+      TELF1(016),
+      AKONT(010),
+  END OF ITAB.
+
+start-of-selection.
+
+CALL FUNCTION 'UPLOAD'
+ EXPORTING
+*   CODEPAGE                      = ' '
+    FILENAME                      = 'C:\Users\SAP E-Academy\Desktop\RAG.DAT'
+    FILETYPE                      = 'DAT'
+*   ITEM                          = ' '
+*   FILEMASK_MASK                 = ' '
+*   FILEMASK_TEXT                 = ' '
+*   FILETYPE_NO_CHANGE            = ' '
+*   FILEMASK_ALL                  = ' '
+*   FILETYPE_NO_SHOW              = ' '
+*   LINE_EXIT                     = ' '
+*   USER_FORM                     = ' '
+*   USER_PROG                     = ' '
+    SILENT                        = 'S'
+* IMPORTING
+*   FILESIZE                      =
+*   CANCEL                        =
+*   ACT_FILENAME                  =
+*   ACT_FILETYPE                  =
+  TABLES
+    DATA_TAB                      = ITAB
+* EXCEPTIONS
+*   CONVERSION_ERROR              = 1
+*   INVALID_TABLE_WIDTH           = 2
+*   INVALID_TYPE                  = 3
+*   NO_BATCH                      = 4
+*   UNKNOWN_ERROR                 = 5
+*   GUI_REFUSE_FILETRANSFER       = 6
+*   OTHERS                        = 7
+          .
+IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+ENDIF.
+
+
+perform open_group.
+LOOP AT ITAB.
+perform bdc_dynpro      using 'SAPMF02K' '0105'.
+perform bdc_field       using 'BDC_CURSOR'
+                              'RF02K-KTOKK'.
+perform bdc_field       using 'BDC_OKCODE'
+                              '/00'.
+perform bdc_field       using 'RF02K-LIFNR'
+                              ITAB-LIFNR.       "'9'.
+perform bdc_field       using 'RF02K-BUKRS'
+                              ITAB-BUKRS.      "'1000'.
+perform bdc_field       using 'RF02K-KTOKK'
+                               ITAB-KTOKK.        "'LIEF'.
+perform bdc_dynpro      using 'SAPMF02K' '0110'.
+perform bdc_field       using 'BDC_CURSOR'
+                              'LFA1-TELF1'.
+perform bdc_field       using 'BDC_OKCODE'
+                              '/00'.
+perform bdc_field       using 'LFA1-ANRED'
+                              ''.
+perform bdc_field       using 'LFA1-NAME1'
+                              ITAB-NAME1.      "'KRISHNA'.
+perform bdc_field       using 'LFA1-SORTL'
+                              ITAB-SORTL.    "'KR'.
+perform bdc_field       using 'LFA1-STRAS'
+                              ITAB-STRAS.   "'K.D.ROAD'.
+perform bdc_field       using 'LFA1-PFACH'
+                              ITAB-PFACH.   "'570012'.
+perform bdc_field       using 'LFA1-ORT01'
+                              ITAB-ORT01.          "'MYSORE'.
+perform bdc_field       using 'LFA1-LAND1'
+                              ITAB-LAND1.     "'IN'.
+perform bdc_field       using 'LFA1-REGIO'
+                              ITAB-REGIO.       "'22'.
+perform bdc_field       using 'LFA1-SPRAS'
+                              ITAB-SPRAS."'EN'.
+perform bdc_field       using 'LFA1-TELF1'
+                              ITAB-TELF1.   "'9998889988'.
+perform bdc_dynpro      using 'SAPMF02K' '0120'.
+perform bdc_field       using 'BDC_CURSOR'
+                              'LFA1-KUNNR'.
+perform bdc_field       using 'BDC_OKCODE'
+                              '/00'.
+perform bdc_field       using 'LFA1-KUNNR'
+                              ''.
+perform bdc_dynpro      using 'SAPMF02K' '0130'.
+perform bdc_field       using 'BDC_CURSOR'
+                              'LFBK-BANKS(01)'.
+perform bdc_field       using 'BDC_OKCODE'
+                              '=UPDA'.
+perform bdc_dynpro      using 'SAPMF02K' '0210'.
+perform bdc_field       using 'BDC_CURSOR'
+                              'LFB1-AKONT'.
+perform bdc_field       using 'BDC_OKCODE'
+                              '=UPDA'.
+perform bdc_field       using 'LFB1-AKONT'
+                              ITAB-AKONT.  "'31000'.
+perform bdc_transaction using 'FK01'.
+ENDLOOP.
+perform close_group.
