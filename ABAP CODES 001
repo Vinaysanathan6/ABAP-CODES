@@ -1,0 +1,98 @@
+*&---------------------------------------------------------------------*
+*& Report  ZABSTRACT_R
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZABSTRACT_R.
+
+CLASS lcl_abstract DEFINITION ABSTRACT.
+
+PUBLIC SECTION.
+
+METHODS : abstract_display ABSTRACT.
+
+METHODS : display.
+
+ENDCLASS. "lcl_abstract DEFINITION
+
+*----------------------------------------------------------------------*
+
+* CLASS lcl_abstract IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+
+*
+
+*----------------------------------------------------------------------*
+
+CLASS lcl_abstract IMPLEMENTATION.
+
+METHOD display.
+
+WRITE:/ 'Normal method'.
+
+ENDMETHOD. "display
+
+ENDCLASS. "lcl_abstract IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+
+* CLASS lcl_class DEFINITION
+
+*----------------------------------------------------------------------*
+
+*
+
+*----------------------------------------------------------------------*
+
+CLASS lcl_class DEFINITION INHERITING FROM lcl_abstract.
+
+PUBLIC SECTION.
+
+METHODS abstract_display REDEFINITION.
+
+METHODS class_display.
+
+ENDCLASS. "lcl_class DEFINITION
+
+*----------------------------------------------------------------------*
+
+* CLASS lcl_class IMPLEMENTATION
+
+*----------------------------------------------------------------------*
+
+*
+
+*----------------------------------------------------------------------*
+
+CLASS lcl_class IMPLEMENTATION.
+
+METHOD abstract_display.
+
+WRITE:/ 'Abstract method'.
+
+ENDMETHOD. "abstract_display
+
+METHOD class_display.
+
+WRITE:/ 'Class method'.
+
+ENDMETHOD. "class_display
+
+ENDCLASS. "lcl_class IMPLEMENTATION
+
+
+START-OF-SELECTION.
+
+DATA : l_ref TYPE REF TO lcl_class.
+
+CREATE OBJECT l_ref.
+
+l_ref->class_display( ).
+
+l_ref->abstract_display( ).
+
+l_ref->display( ).
