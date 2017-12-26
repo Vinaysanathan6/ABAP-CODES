@@ -1,0 +1,28 @@
+*&---------------------------------------------------------------------*
+*& Report  ZCL_CONSTRUSS_R
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZCL_CONSTRUSS_R.
+CLASS C1 DEFINITION.
+  PUBLIC SECTION.
+  METHODS : CONSTRUCTOR IMPORTING A TYPE I,
+            M1.
+  ENDCLASS.
+  CLASS C1 IMPLEMENTATION.
+    METHOD CONSTRUCTOR.
+      WRITE:/'I AM CONSTURTOR'.
+      WRITE:/'A=',A.
+      ENDMETHOD.
+      METHOD M1.
+        WRITE:/'I AM METHOD'.
+        ENDMETHOD.
+   ENDCLASS.
+
+   DATA : CON TYPE REF TO C1.
+   START-OF-SELECTION.
+   CREATE OBJECT CON EXPORTING A = 100.
+   CALL METHOD CON->M1.
