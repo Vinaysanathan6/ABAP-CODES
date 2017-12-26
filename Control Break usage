@@ -1,0 +1,39 @@
+*&---------------------------------------------------------------------*
+*& Report  ZCONTROLBR_R
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZCONTROLBR_R.
+DATA: gwa_spfli TYPE spfli.
+DATA: gt_spfli  TYPE TABLE OF spfli.
+
+*UP TO 5 ROWS addition selects only 5 rows from table SPFLI
+
+SELECT * UP TO 5 ROWS FROM spfli INTO TABLE gt_spfli.
+
+LOOP AT gt_spfli INTO gwa_spfli.
+
+AT FIRST.
+
+    WRITE:/ 'Start of Loop'.
+    WRITE:/ 'Flight Details'.
+    WRITE:/ 'Airline Code' COLOR 5,14 'Connection No.' COLOR 5,
+         29 'Departure City' COLOR 5, 44 'Arival City' COLOR 5.
+    ULINE.
+
+ENDAT.
+
+  WRITE:/ gwa_spfli-carrid,14 gwa_spfli-connid,
+       29 gwa_spfli-cityfrom,44 gwa_spfli-cityto.
+
+AT LAST.
+
+    ULINE.
+    WRITE:/ 'End of Loop'.
+
+ENDAT.
+
+ENDLOOP.
