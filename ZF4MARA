@@ -1,0 +1,20 @@
+*&---------------------------------------------------------------------*
+*& Report  ZF4MARA
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZF4MARA.
+
+"DATA: ITAB TYPE ZSTR_MARA.
+SELECTION-SCREEN BEGIN OF BLOCK RAD1 WITH FRAME TITLE TIL NO INTERVALS.
+PARAMETERS : P_MAT LIKE ZSTR_MARA-MATNR.
+SELECTION-SCREEN END OF BLOCK RAD1.
+
+START-OF-SELECTION.
+WRITE:/ 'STATEMENT 1'.
+
+END-OF-SELECTION.
+WRITE:/ 'STATEMENT 2'.
