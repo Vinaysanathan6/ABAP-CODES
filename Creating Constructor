@@ -1,0 +1,58 @@
+*&---------------------------------------------------------------------*
+*& Report  ZCONSTRUCR_SIMPLE1_R
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZCONSTRUCR_SIMPLE1_R.
+CLASS EMPY DEFINITION.
+  PUBLIC SECTION.
+   TYPES : BEGIN OF TY,
+           ID TYPE I,
+           NAME TYPE STRING,
+           END OF TY.
+  METHODS : CONSTRUCTOR
+               IMPORTING IM_ID TYPE I
+                         IM_NAME TYPE STRING,
+            DISPLAY.
+  CLASS-METHODS : DIS_NO_EMP.
+  PROTECTED SECTION.
+    CLASS-DATA : NO_EMP TYPE I.
+  PRIVATE SECTION.
+    DATA: EMP TYPE TY.
+ENDCLASS.
+CLASS EMPY IMPLEMENTATION.
+  METHOD CONSTRUCTOR.
+    EMP-ID = IM_ID.
+    EMP-NAME = IM_NAME.
+    NO_EMP = NO_EMP + 1.
+  ENDMETHOD.
+  METHOD DISPLAY.
+    WRITE:/ 'EMPLOYES ARE',EMP-ID,EMP-NAME.
+  ENDMETHOD.
+  METHOD DIS_NO_EMP.
+    WRITE :/ 'TOTAL NO EMPLOPES',NO_EMP.
+  ENDMETHOD.
+ENDCLASS.
+
+DATA: EMP1 TYPE REF TO EMPY,
+      EMP2 TYPE REF TO EMPY,
+      EMP3 TYPE REF TO EMPY.
+
+START-OF-SELECTION.
+CREATE OBJECT: EMP1
+               EXPORTING IM_ID = '1'
+                        IM_NAME = 'RAGHU',
+               EMP2
+               EXPORTING IM_ID = '2'
+                        IM_NAME = 'HARI',
+               EMP3
+               EXPORTING IM_ID = '3'
+                        IM_NAME = 'RAMA'.
+
+CALL METHOD EMP1->DISPLAY.
+CALL METHOD EMP2->DISPLAY.
+CALL METHOD EMP3->DISPLAY.
+CALL METHOD EMP1->DIS_NO_EMP.
