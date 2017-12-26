@@ -1,0 +1,31 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBASIC_R
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZBASIC_RC.
+
+DO 3 TIMES.
+WRITE :/ SY-INDEX COLOR 4.  " CURRENT LOOP PASSES.
+ENDDO.
+
+WHILE SY-INDEX < 3.
+ WRITE :/ SY-INDEX COLOR 3.
+ENDWHILE.
+
+"DATA : ITAB TYPE ZPROJVIEW OCCURS 0 WITH HEADER LINE.
+DATA : ITAB TYPE TABLE OF ZDBVW_R WITH HEADER LINE.
+
+"SELECT * FROM ZPROJVIEW INTO TABLE ITAB.
+SELECT * FROM ZDBVW_R INTO TABLE ITAB.
+
+WRITE :/ 'ID', 15 'NAME', 30 'DEPTMENT'.
+
+LOOP AT ITAB.
+  WRITE :/ ITAB-ID UNDER 'ID',
+          ITAB-NAME UNDER 'NAME',
+          ITAB-DEPT_NAME UNDER 'S_ID'.
+  ENDLOOP.
