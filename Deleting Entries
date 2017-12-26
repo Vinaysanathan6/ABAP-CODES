@@ -1,0 +1,27 @@
+*&---------------------------------------------------------------------*
+*& Report  ZDELETE_R
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZDELETE_R.
+DATA: gwa_employee TYPE zemplope.
+
+gwa_employee-id      = 15.
+*gwa_employee-name    = 'JOSEPH'.
+*gwa_employee-place   = 'FRANKFURT'.
+*gwa_employee-phone   = '7897897890'.
+*gwa_employee-dept_id = 5.
+
+DELETE zemplope FROM gwa_employee.
+DELETE FROM zemplope WHERE id = 7.
+WRITE:/1 'Emp ID' color 5,9 'Name' color 5,17 'Place' color 5,
+      27 'Phone' color 5,39 'Dept' color 5.
+
+SELECT * FROM zemplope INTO gwa_employee.
+  WRITE:/1 gwa_employee-id,9 gwa_employee-name,
+        17 gwa_employee-place,27 gwa_employee-phone,
+        39 gwa_employee-dept_id.
+ENDSELECT.
