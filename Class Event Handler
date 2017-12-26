@@ -1,0 +1,56 @@
+*&---------------------------------------------------------------------*
+*& Report  ZCL_EVENT1_R
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZCL_EVENT1_R.
+CLASS C1 DEFINITION.
+  PUBLIC SECTION.
+  EVENTS : E1.
+  METHODS : M1 FOR EVENT E1 OF C1.
+*  METHODS : M1.
+  METHODS : T1.
+  ENDCLASS.
+  CLASS C1 IMPLEMENTATION.
+  METHOD : M1.
+    WRITE :/'I AM TRIGGER'.
+  ENDMETHOD.
+  METHOD: T1.
+    WRITE :/'I AM TRIGGER METHOD'.
+    RAISE EVENT E1.
+  ENDMETHOD.
+  ENDCLASS.
+  CLASS C2 DEFINITION.
+    PUBLIC SECTION.
+    EVENTS : E1.
+    METHODS : M2 FOR EVENT E1 OF C1.
+    METHODS : T2.
+    ENDCLASS.
+  CLASS C2 IMPLEMENTATION.
+    METHOD: M2.
+      WRITE :/'I AM TRIGGER METHOD OF C2'.
+     ENDMETHOD.
+     METHOD : T2.
+       WRITE : /'I AM TRI 2222'.
+       RAISE EVENT E1.
+     ENDMETHOD.
+  ENDCLASS.
+
+  START-OF-SELECTION.
+  DATA : OV1 TYPE REF TO C1,
+         OV2 TYPE REF TO C2.
+
+   CREATE OBJECT: OV1, OV2.
+
+*   CREATE OBJECT OV2.
+
+  SET HANDLER OV1->M1 FOR OV1.
+*  CALL METHOD OV1->M1.
+  CALL METHOD OV1->T1.
+
+*  SET HANDLER OV2->M2 FOR OV2.
+  CALL METHOD OV2->M2.
+  CALL METHOD OV2->T2.
