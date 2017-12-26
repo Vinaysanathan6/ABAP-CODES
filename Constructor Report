@@ -1,0 +1,30 @@
+*&---------------------------------------------------------------------*
+*& Report  ZCONSTRUCR_R
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZCONSTRUCR_R.
+CLASS C1 DEFINITION.
+  PUBLIC SECTION.
+  METHODS : CONSTRUCTOR IMPORTING A TYPE I,
+                       "EXPORTING B TYPE I,
+            M1.
+ENDCLASS.
+CLASS C1 IMPLEMENTATION.
+  METHOD CONSTRUCTOR.
+     WRITE:/ 'I AM CONSTUCTOR'.
+     WRITE:/'A=',A.
+     ENDMETHOD.
+  METHOD  M1.
+    WRITE: / 'AM ANOTHER METHOD'.
+  ENDMETHOD.
+  ENDCLASS.
+
+  START-OF-SELECTION.
+  DATA : OBJ TYPE REF TO C1.
+  CREATE OBJECT OBJ EXPORTING A = 10.
+                      "IMPORIING B = C.
+  CALL METHOD OBJ->M1.
