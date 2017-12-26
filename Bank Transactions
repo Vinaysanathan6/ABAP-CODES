@@ -1,0 +1,33 @@
+
+*&---------------------------------------------------------------------*
+*& Report  ZACCOUT_R
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZACCOUT_R.
+DATA: acct1 type ref to zacct_r.
+
+DATA: bal type i,
+      bal1 type i.
+
+create object: acct1.
+
+selection-screen begin of block a.
+parameters: p_amnt type dmbtr,
+            p_dpst type dmbtr,
+            p_wdrw type dmbtr.
+selection-screen end of block a.
+
+start-of-selection.
+
+call method acct1->set_balance( p_amnt ).
+write:/ 'Set balance to ', p_amnt.
+
+bal = acct1->deposit( p_dpst ).
+write:/ 'Deposited ', p_dpst ,' bucks making balance to ', bal.
+
+bal1 = acct1->withdraw( p_wdrw ).
+write:/ 'Withdrew ', p_wdrw ,' bucks making balance to ', bal1.
