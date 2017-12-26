@@ -1,0 +1,90 @@
+*&---------------------------------------------------------------------*
+*& Report  ZCONSTRUCR_SIMPLE_R
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZCONSTRUCR_SIMPLE_R.
+* Employee - Definition
+CLASS EMP DEFINITION.
+
+* The public section is accesible from outside
+  PUBLIC SECTION.
+
+  TYPES :
+          BEGIN OF T_EMP,
+            NO TYPE I,
+            NAME TYPE STRING,
+          END OF T_EMP.
+
+METHODS : CONSTRUCTOR
+              IMPORTING IM_EMP_NO TYPE I
+                        IM_EMP_NAME TYPE STRING,
+
+          DISPLAY_EMP.
+
+*   Class methods are global for all instances
+CLASS-METHODS : DISPLAY_NO_OF_EMP.
+
+PROTECTED SECTION.
+* The protecetd section is accesible from the class and its subclasses
+
+*   Class data are global for all instances
+CLASS-DATA : G_NO_OF_EMP TYPE I.
+
+PRIVATE SECTION.
+* The private section is only accesible from within the classs
+
+DATA : G_EMP TYPE T_EMP.
+
+ENDCLASS.
+
+*  Employee - Implementation
+CLASS EMP IMPLEMENTATION.
+
+  METHOD CONSTRUCTOR .
+    G_EMP-NO = IM_EMP_NO.
+    G_EMP-NAME = IM_EMP_NAME.
+    G_NO_OF_EMP =  G_NO_OF_EMP + 1.
+  ENDMETHOD.
+
+  METHOD DISPLAY_EMP.
+    WRITE :/ 'EMPLOYEE', G_EMP-NO ,
+             G_EMP-NAME.
+     SKIP.
+  ENDMETHOD.
+
+  METHOD DISPLAY_NO_OF_EMP.
+    WRITE :/'NUMBER OF EMPLOYEES IS : ', G_NO_OF_EMP.
+  ENDMETHOD.
+
+  ENDCLASS.
+
+  DATA : G_EMP1 TYPE REF TO EMP,
+         G_EMP2 TYPE REF TO EMP,
+         G_EMP3 TYPE REF TO EMP,
+         G_EMP4 TYPE REF TO EMP.
+
+  START-OF-SELECTION.
+    CREATE OBJECT G_EMP1
+           EXPORTING IM_EMP_NO = 1
+                     IM_EMP_NAME = 'RAGHU'.
+    CREATE OBJECT G_EMP2
+           EXPORTING IM_EMP_NO = 2
+                     IM_EMP_NAME = 'RAVI'.
+
+    CREATE OBJECT G_EMP3
+           EXPORTING IM_EMP_NO = 3
+                     IM_EMP_NAME = 'MELVIN'.
+    CREATE OBJECT G_EMP4
+           EXPORTING IM_EMP_NO = 4
+                     IM_EMP_NAME = 'GEETHA'.
+
+CALL METHOD G_EMP1->DISPLAY_EMP.
+CALL METHOD G_EMP2->DISPLAY_EMP.
+CALL METHOD G_EMP3->DISPLAY_EMP.
+CALL METHOD G_EMP4->DISPLAY_EMP.
+
+CALL METHOD G_EMP4->DISPLAY_NO_OF_EMP.
