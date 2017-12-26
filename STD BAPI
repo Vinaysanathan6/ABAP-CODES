@@ -1,0 +1,160 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBAPI_R
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZBAPI_R.
+TABLES: EKPO.
+DATA:GM_HEADER TYPE BAPI2017_GM_HEAD_01,
+     GM_CODE TYPE BAPI2017_GM_CODE,
+     GM_ITEM TYPE BAPI2017_GM_ITEM_CREATE OCCURS 0 WITH HEADER LINE,
+     GM_HEADRET TYPE BAPI2017_GM_HEAD_RET,
+     GM_RETURN TYPE BAPIRET2 OCCURS 0 WITH HEADER LINE,
+     GM_RETMTD  TYPE BAPI2017_GM_HEAD_RET-MAT_DOC.
+CLEAR: GM_RETURN, GM_RETMTD. REFRESH GM_RETURN.
+
+TYPES : BEGIN OF TY,
+        EBELN TYPE EBELN,
+        END OF TY.
+TYPES : BEGIN OF TY1,
+        EBELN TYPE EKPO-EBELN,
+        MATNR TYPE EKPO-MATNR,
+        EBELP TYPE EKPO-EBELP,
+        MENGE TYPE EKPO-MENGE,
+        MEINS TYPE EKPO-MEINS,
+        WERKS TYPE EKPO-WERKS,
+        LGORT TYPE EKPO-LGORT,
+        LIFNR TYPE EKKO-LIFNR,
+*        NETPR TYPE EKPO-NETPR,
+        END OF TY1.
+
+DATA : IT TYPE TABLE OF TY WITH HEADER LINE,
+       IT1 TYPE TABLE OF TY1 WITH HEADER LINE.
+
+DATA : FILE TYPE STRING.
+PARAMETERS : P_FILE TYPE RLGRAP-FILENAME DEFAULT
+              'C:\Users\RAGHAVENDRA.V\Desktop\PO.txt'.
+
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR P_FILE.
+
+CALL FUNCTION 'F4_FILENAME'
+  EXPORTING
+   PROGRAM_NAME        = SYST-CPROG
+   DYNPRO_NUMBER       = SYST-DYNNR
+*   FIELD_NAME         = ' '
+ IMPORTING
+   FILE_NAME           = P_FILE
+          .
+
+START-OF-SELECTION.
+FILE = P_FILE.
+CALL FUNCTION 'GUI_UPLOAD'
+  EXPORTING
+    FILENAME                      = FILE
+    FILETYPE                      = 'DAT'
+*   HAS_FIELD_SEPARATOR           = ' '
+*   HEADER_LENGTH                 = 0
+*   READ_BY_LINE                  = 'X'
+*   DAT_MODE                      = ' '
+*   CODEPAGE                      = ' '
+*   IGNORE_CERR                   = ABAP_TRUE
+*   REPLACEMENT                   = '#'
+*   CHECK_BOM                     = ' '
+*   VIRUS_SCAN_PROFILE            =
+*   NO_AUTH_CHECK                 = ' '
+* IMPORTING
+*   FILELENGTH                    =
+*   HEADER                        =
+  TABLES
+    DATA_TAB                      = IT
+* EXCEPTIONS
+*   FILE_OPEN_ERROR               = 1
+*   FILE_READ_ERROR               = 2
+*   NO_BATCH                      = 3
+*   GUI_REFUSE_FILETRANSFER       = 4
+*   INVALID_TYPE                  = 5
+*   NO_AUTHORITY                  = 6
+*   UNKNOWN_ERROR                 = 7
+*   BAD_DATA_FORMAT               = 8
+*   HEADER_NOT_ALLOWED            = 9
+*   SEPARATOR_NOT_ALLOWED         = 10
+*   HEADER_TOO_LONG               = 11
+*   UNKNOWN_DP_ERROR              = 12
+*   ACCESS_DENIED                 = 13
+*   DP_OUT_OF_MEMORY              = 14
+*   DISK_FULL                     = 15
+*   DP_TIMEOUT                    = 16
+*   OTHERS                        = 17
+          .
+IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+ENDIF.
+
+LOOP AT IT.
+SELECT EKPO~EBELN EKPO~MATNR EKPO~EBELP EKPO~MENGE EKPO~MEINS EKPO~WERKS EKPO~LGORT
+ EKKO~LIFNR  FROM EKPO INNER JOIN EKKO ON EKPO~EBELN = EKKO~EBELN
+  INTO CORRESPONDING FIELDS OF TABLE IT1 WHERE EKPO~EBELN = IT-EBELN.
+ENDLOOP.
+
+GM_HEADER-PSTNG_DATE = SY-DATUM.
+GM_HEADER-DOC_DATE = SY-DATUM.
+GM_CODE-GM_CODE = '01'.
+
+LOOP AT IT1.
+  GM_ITEM-MATERIAL = IT1-MATNR.
+  GM_ITEM-PLANT = IT1-WERKS."'R313'.
+  GM_ITEM-STGE_LOC = 'FARM'."'0001'.
+  GM_ITEM-MOVE_TYPE = '101'.
+  GM_ITEM-PO_ITEM = IT1-EBELP.
+  GM_ITEM-ENTRY_QNT = IT1-MENGE.
+  GM_ITEM-ENTRY_UOM = IT1-MEINS.
+  GM_ITEM-VENDOR = IT1-LIFNR.
+  GM_ITEM-PO_NUMBER = IT1-EBELN.
+*  GM_ITEM-REF_DOC = IT-EBELN.
+*  GM_ITEM-
+  GM_ITEM-MVT_IND = 'B'.
+  APPEND GM_ITEM.
+
+
+CALL FUNCTION 'BAPI_GOODSMVT_CREATE'
+  EXPORTING
+    GOODSMVT_HEADER               = GM_HEADER
+    GOODSMVT_CODE                 = GM_CODE
+*   TESTRUN                       = ' '
+*   GOODSMVT_REF_EWM              =
+ IMPORTING
+    GOODSMVT_HEADRET              = GM_HEADRET
+*    MATERIALDOCUMENT              = GM_RETMTD
+*   MATDOCUMENTYEAR               =
+  TABLES
+    GOODSMVT_ITEM                 = GM_ITEM
+*   GOODSMVT_SERIALNUMBER         =
+    RETURN                        = GM_RETURN
+*   GOODSMVT_SERV_PART_DATA       =
+*   EXTENSIONIN                   =
+          .
+*IF NOT GM_RETMTD IS INITIAL.
+*  COMMIT WORK AND WAIT.
+*  CALL FUNCTION 'DEQUEUE_ALL'.
+*ELSE.
+*  COMMIT WORK AND WAIT.
+*  CALL FUNCTION 'DEQUEUE_ALL'.
+*ENDIF.
+*
+*WRITE:/ GM_RETMTD.
+
+*LOOP AT GM_RETURN.
+
+ENDLOOP.
+CALL FUNCTION 'BAPI_TRANSACTION_COMMIT'
+ EXPORTING
+   WAIT          = 'X'
+* IMPORTING
+*   RETURN        =
+          .
+
+WRITE: GM_RETURN-TYPE,
+          GM_RETURN-MESSAGE.
