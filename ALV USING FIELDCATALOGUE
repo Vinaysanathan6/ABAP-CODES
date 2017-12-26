@@ -1,0 +1,57 @@
+*&---------------------------------------------------------------------*
+*& Report  ZALV_R2
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZALV_R2.
+
+TYPE-POOLS: slis.  " SLIS contains all the ALV data types
+
+*&---------------------------------------------------------------------*
+*& Data Declaration
+*&---------------------------------------------------------------------*
+
+DATA: BEGIN OF wa_sbook OCCURS 0,
+      status(4).
+      INCLUDE STRUCTURE sbook.
+DATA: END OF wa_sbook.
+DATA: it_sbook     TYPE TABLE OF sbook.
+DATA: it_fieldcat  TYPE slis_t_fieldcat_alv,
+      wa_fieldcat  TYPE slis_fieldcat_alv.
+*&---------------------------------------------------------------------*
+*& START-OF-SELECTION
+*&---------------------------------------------------------------------*
+START-OF-SELECTION.
+
+*Build field catalog
+  wa_fieldcat-fieldname  = 'STATUS'.    " Fieldname in the data table
+  wa_fieldcat-seltext_m  = 'Status'.    " Column description in the output
+  APPEND wa_fieldcat TO it_fieldcat.
+
+*Fetch data from the database
+  SELECT * UP TO 10 ROWS FROM sbook INTO CORRESPONDING FIELDS OF TABLE wa_sbook.
+
+*Merge Field Catalog
+  CALL FUNCTION 'REUSE_ALV_FIELDCATALOG_MERGE'
+   EXPORTING
+     i_structure_name             = 'SBOOK'
+   CHANGING
+      ct_fieldcat                 = it_fieldcat
+   EXCEPTIONS
+     inconsistent_interface       = 1
+     program_error                = 2
+     OTHERS                       = 3.
+
+*Pass data and field catalog to ALV function module to display ALV list
+
+  CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+    EXPORTING
+      it_fieldcat   = it_fieldcat
+    TABLES
+      t_outtab      = wa_sbook
+    EXCEPTIONS
+      program_error = 1
+      OTHERS        = 2.
