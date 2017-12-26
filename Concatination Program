@@ -1,0 +1,17 @@
+*&---------------------------------------------------------------------*
+*& Report  ZCONCATE_R
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZCONCATE_R.
+ DATA: wa type zemplope,
+       result type string.
+select * from zemplope into corresponding fields of wa .
+
+concatenate wa-ID wa-name wa-PLACE wa-PHONE into result separated by '::'.
+
+  write:/ result.
+  endselect.
