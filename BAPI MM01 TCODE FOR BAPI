@@ -1,0 +1,195 @@
+*&---------------------------------------------------------------------*
+*& Report  ZBAPI_MM
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZBAPI_MM.
+
+DATA : HEADDATA TYPE BAPIMATHEAD,
+      CLIENTDATA TYPE BAPI_MARA,
+      CLIENTDATAX TYPE BAPI_MARAX,
+      MAT_DES TYPE BAPI_MAKT OCCURS 0 WITH HEADER LINE,
+      PLANTDATA TYPE BAPI_MARC,
+      PLANTDATAX TYPE BAPI_MARCX,
+      VALUATIONDATA TYPE BAPI_MBEW,
+      VALUATIONDATAX TYPE BAPI_MBEWX,
+      RETURN TYPE BAPIRET2,
+*      MATL_TYPE TYPE BAPIMATDOA-MATL_TYPE,
+*      IND_SEC TYPE BAPIMATDOA-IND_SECTOR,
+      MAT_NU TYPE BAPIMATINR OCCURS 0 WITH HEADER LINE.
+
+DATA : BEGIN OF IT OCCURS 0,
+*       MATNR TYPE MARA-MATNR,
+       MBRSH TYPE MARA-MBRSH,
+       MTART TYPE MARA-MTART,
+       MAKTX TYPE MAKT-MAKTX,
+       MEINS TYPE MARA-MEINS,
+       MATKL TYPE MARA-MATKL,
+       WERKS TYPE BAPI_MARC-PLANT,
+       EKGRP TYPE MARC-EKGRP,     "PURCHASING GROUP
+       DISMM TYPE MARC-DISMM,   "MRP TYPE
+       BKLAS TYPE MBEW-BKLAS,    " VALUATING CLASS
+       VERPR TYPE MBEW-VERPR,   "MOVING PRICE
+       END OF IT.
+
+DATA : FILE TYPE STRING,
+       BASIC TYPE C.
+
+ PARAMETERS : P_FILE TYPE RLGRAP-FILENAME.
+
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR P_FILE.
+
+CALL FUNCTION 'F4_FILENAME'
+  EXPORTING
+   PROGRAM_NAME        = SYST-CPROG
+   DYNPRO_NUMBER       = SYST-DYNNR
+   FIELD_NAME          = ' '
+  IMPORTING
+   FILE_NAME           = P_FILE .
+
+START-OF-SELECTION.
+FILE = P_FILE.
+
+CALL FUNCTION 'GUI_UPLOAD'
+  EXPORTING
+    FILENAME                      = FILE
+    FILETYPE                      = 'DAT'
+*   HAS_FIELD_SEPARATOR           = ' '
+*   HEADER_LENGTH                 = 0
+*   READ_BY_LINE                  = 'X'
+*   DAT_MODE                      = ' '
+*   CODEPAGE                      = ' '
+*   IGNORE_CERR                   = ABAP_TRUE
+*   REPLACEMENT                   = '#'
+*   CHECK_BOM                     = ' '
+*   VIRUS_SCAN_PROFILE            =
+*   NO_AUTH_CHECK                 = ' '
+* IMPORTING
+*   FILELENGTH                    =
+*   HEADER                        =
+  TABLES
+    DATA_TAB                      = IT
+* EXCEPTIONS
+*   FILE_OPEN_ERROR               = 1
+*   FILE_READ_ERROR               = 2
+*   NO_BATCH                      = 3
+*   GUI_REFUSE_FILETRANSFER       = 4
+*   INVALID_TYPE                  = 5
+*   NO_AUTHORITY                  = 6
+*   UNKNOWN_ERROR                 = 7
+*   BAD_DATA_FORMAT               = 8
+*   HEADER_NOT_ALLOWED            = 9
+*   SEPARATOR_NOT_ALLOWED         = 10
+*   HEADER_TOO_LONG               = 11
+*   UNKNOWN_DP_ERROR              = 12
+*   ACCESS_DENIED                 = 13
+*   DP_OUT_OF_MEMORY              = 14
+*   DISK_FULL                     = 15
+*   DP_TIMEOUT                    = 16
+*   OTHERS                        = 17
+          .
+IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+ENDIF.
+
+HEADDATA-BASIC_VIEW = 'X'.
+*HEADDATA-PURCHASE_VIEW = 'X'.
+*HEADDATA-MRP_VIEW = 'X'.
+*HEADDATA-STORAGE_VIEW = 'X'.
+*HEADDATA-ACCOUNT_VIEW = 'X'.
+LOOP AT IT.
+CLEAR MAT_NU[].
+CALL FUNCTION 'BAPI_STDMATERIAL_GETINTNUMBER'
+  EXPORTING
+    MATERIAL_TYPE          = IT-MTART
+    INDUSTRY_SECTOR        = IT-MBRSH
+*   REQUIRED_NUMBERS       = 1
+* IMPORTING
+*   RETURN                 =
+  TABLES
+    MATERIAL_NUMBER        = MAT_NU
+          .
+   READ TABLE MAT_NU INDEX 1.
+   IF SY-SUBRC = 0.
+    HEADDATA-MATERIAL = MAT_NU-MATERIAL.
+   ENDIF.
+*  HEADDATA-MATERIAL = ''.
+  HEADDATA-IND_SECTOR = IT-MBRSH.
+  HEADDATA-MATL_TYPE = IT-MATKL.
+
+  MAT_DES-MATL_DESC = IT-MAKTX.
+  MAT_DES-LANGU = 'EN'.
+  APPEND MAT_DES.
+
+  CLIENTDATA-BASE_UOM = IT-MEINS.
+  CLIENTDATAX-BASE_UOM = 'X'.
+  CLIENTDATA-MATL_GROUP = IT-MATKL.
+  CLIENTDATAX-MATL_GROUP = 'X'.
+
+  PLANTDATA-PLANT = IT-WERKS.
+  PLANTDATAX-PLANT = IT-WERKS.
+  PLANTDATA-PUR_GROUP = IT-EKGRP.
+  PLANTDATAX-PUR_GROUP = 'X'.
+  PLANTDATA-MRP_TYPE = IT-DISMM.
+  PLANTDATAX-MRP_TYPE = 'X'.
+
+*  VALUATIONDATA-VAL_CLASS = IT-BKLAS.
+*  VALUATIONDATAX-VAL_CLASS = 'X'.
+*  VALUATIONDATA-MOV_PR_PP = IT-VERPR.
+*  VALUATIONDATAX-MOV_PR_PP = 'X'.
+
+CALL FUNCTION 'BAPI_MATERIAL_SAVEDATA'
+  EXPORTING
+    HEADDATA                   = HEADDATA
+    CLIENTDATA                 = CLIENTDATA
+    CLIENTDATAX                = CLIENTDATAX
+    PLANTDATA                  = PLANTDATA
+    PLANTDATAX                 = PLANTDATAX
+*   FORECASTPARAMETERS         =
+*   FORECASTPARAMETERSX        =
+*   PLANNINGDATA               =
+*   PLANNINGDATAX              =
+*   STORAGELOCATIONDATA        =
+*   STORAGELOCATIONDATAX       =
+*   VALUATIONDATA              = VALUATIONDATA
+*   VALUATIONDATAX              = VALUATIONDATAX
+*   WAREHOUSENUMBERDATA        =
+*   WAREHOUSENUMBERDATAX       =
+*   SALESDATA                  =
+*   SALESDATAX                 =
+*   STORAGETYPEDATA            =
+*   STORAGETYPEDATAX           =
+*   FLAG_ONLINE                = ' '
+*   FLAG_CAD_CALL              = ' '
+*   NO_DEQUEUE                 = ' '
+*   NO_ROLLBACK_WORK           = ' '
+  IMPORTING
+    RETURN                     = RETURN
+  TABLES
+    MATERIALDESCRIPTION        = MAT_DES
+*   UNITSOFMEASURE             =
+*   UNITSOFMEASUREX            =
+*   INTERNATIONALARTNOS        =
+*   MATERIALLONGTEXT           =
+*   TAXCLASSIFICATIONS         =
+*   RETURNMESSAGES             =
+*   PRTDATA                    =
+*   PRTDATAX                   =
+*   EXTENSIONIN                =
+*   EXTENSIONINX               =
+      .
+ ENDLOOP.
+  CALL FUNCTION 'BAPI_TRANSACTION_COMMIT'
+    EXPORTING
+      WAIT          = 'X'
+*   IMPORTING
+*     RETURN        =
+            .
+*  LOOP AT RETURN.
+  WRITE :/ RETURN-TYPE,
+           RETURN-MESSAGE.
+
+*ENDLOOP.
